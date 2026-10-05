@@ -1,0 +1,8 @@
+{
+  "name": "Tikets de stock nuevo",
+  "description": "Sistema de gestión de reportes de stock, ingresos, productos encontrados y movimientos de inventario.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

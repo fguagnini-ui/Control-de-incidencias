@@ -1,0 +1,86 @@
+{
+  "np": 4,
+  "nm": 1,
+  "reportes": [
+    {
+      "id": "01-00001",
+      "tipo": "problema",
+      "fecha": "2026-10-05",
+      "reporta": "Franco",
+      "items": [
+        {
+          "sku": "CW1160",
+          "desc": "Multiplicador de fuerza 1:64",
+          "cant": 1
+        }
+      ],
+      "sku": "CW1160",
+      "desc": "Multiplicador de fuerza 1:64",
+      "trx": "#2000065481365416",
+      "causa": "Roto en embalaje",
+      "origen": "Devoluciones",
+      "cant": 1,
+      "sol": "Ofrecido reemplazo al cliente",
+      "estado": "Notificado",
+      "mov": null,
+      "ubicacion": "Sector Devoluciones - Rincón A"
+    },
+    {
+      "id": "01-00002",
+      "tipo": "ingreso",
+      "fecha": "2026-10-05",
+      "reporta": "Matías",
+      "items": [
+        {
+          "sku": "CW1108",
+          "desc": "Juego de llaves tubo 94 pzs",
+          "cant": 10
+        },
+        {
+          "sku": "CW1109",
+          "desc": "Juego de llaves combinadas 12 pzs",
+          "cant": 5
+        },
+        {
+          "sku": "CW1120",
+          "desc": "Bocallaves hexagonales 1/2 pulgada",
+          "cant": 8
+        }
+      ],
+      "sku": "CW1108",
+      "desc": "Juego de llaves tubo 94 pzs (+2 productos)",
+      "trx": "REM-2024-0089",
+      "causa": "Recepción de compra / Proveedor",
+      "origen": "Proveedor",
+      "cant": 23,
+      "sol": "Verificado control de calidad en recepción",
+      "estado": "Abierto",
+      "mov": null,
+      "ubicacion": "Bahía 4 - Estantería 12"
+    },
+    {
+      "id": "01-00003",
+      "tipo": "encontrado",
+      "fecha": "2026-10-05",
+      "reporta": "Franco",
+      "items": [
+        {
+          "sku": "CW1050",
+          "desc": "Torquímetro de zafre 1/2 pulgada",
+          "cant": 2
+        }
+      ],
+      "sku": "CW1050",
+      "desc": "Torquímetro de zafre 1/2 pulgada",
+      "trx": "#AUD-2024-B",
+      "causa": "Hallado en estantería sin registrar",
+      "origen": "Depósito",
+      "cant": 2,
+      "sol": "Reingresado a conteo físico",
+      "estado": "Abierto",
+      "mov": null,
+      "ubicacion": "Pasillo C - Estante 2"
+    }
+  ],
+  "movimientos": []
+}
