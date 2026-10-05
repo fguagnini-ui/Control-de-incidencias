@@ -30,6 +30,7 @@ interface DatabaseViewProps {
   onResetExample: () => void;
   onClearAll: () => void;
   onImportDatabase?: (newDb: StockDatabase) => void;
+  onOpenImportCsv?: () => void;
   initialQuery?: string;
   initialSubTab?: 'reportes' | 'movimientos';
 }
@@ -62,6 +63,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   onResetExample,
   onClearAll,
   onImportDatabase,
+  onOpenImportCsv,
   initialQuery = '',
   initialSubTab
 }) => {
@@ -348,6 +350,19 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Exportar CSV</span>
             </button>
+
+            {/* Import Movements CSV */}
+            {onOpenImportCsv && (
+              <button
+                type="button"
+                onClick={onOpenImportCsv}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 hover:bg-purple-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                title="Cargar movimientos masivos desde una plantilla CSV"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span>Importar Movimientos CSV</span>
+              </button>
+            )}
           </div>
         </div>
 

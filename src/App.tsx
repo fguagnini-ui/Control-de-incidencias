@@ -8,6 +8,7 @@ import { DatabaseView } from './components/DatabaseView';
 import { NewReportModal } from './components/NewReportModal';
 import { ResolveModal } from './components/ResolveModal';
 import { DeleteMovementModal } from './components/DeleteMovementModal';
+import { ImportMovementsModal } from './components/ImportMovementsModal';
 import { LoginGate } from './components/LoginGate';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [resolveIds, setResolveIds] = useState<string[]>([]);
   const [movementToDelete, setMovementToDelete] = useState<StockMovement | null>(null);
+  const [isImportCsvOpen, setIsImportCsvOpen] = useState(false);
 
   // Database view deep-link state
   const [dbQuery, setDbQuery] = useState('');
@@ -228,6 +230,36 @@ export default function App() {
     showToast(`Base de datos importada (${newDb.reportes.length} tickets, ${newDb.movimientos.length} movimientos)`);
   };
 
+  const handleConfirmImportMovements = (newMovements: StockMovement[], resolvedReportIds: string[]) => {
+    setDb((prev) => {
+      const nextMovements = [...prev.movimientos, ...newMovements];
+
+      const nextReports = prev.reportes.map((r) => {
+        if (resolvedReportIds.includes(r.id)) {
+          const linkedMov = newMovements.find((m) => m.lineas.some((l) => l.pid === r.id));
+          return {
+            ...r,
+            estado: 'Cerrado' as ReportStatus,
+            mov: linkedMov ? linkedMov.id : r.mov
+          };
+        }
+        return r;
+      });
+
+      const nextNm = prev.nm + newMovements.length;
+
+      return {
+        ...prev,
+        nm: nextNm,
+        reportes: nextReports,
+        movimientos: nextMovements
+      };
+    });
+
+    const totalLines = newMovements.reduce((acc, m) => acc + m.lineas.length, 0);
+    showToast(`${newMovements.length} movimientos importados (${totalLines} líneas de stock)`);
+  };
+
   const handleGoToReport = (reportId: string) => {
     setDbQuery(reportId);
     setDbSubTab('reportes');
@@ -300,6 +332,7 @@ export default function App() {
             onOpenResolve={handleOpenResolve}
             onGoToReport={handleGoToReport}
             onRequestDeleteMovement={(m) => setMovementToDelete(m)}
+            onOpenImportCsv={() => setIsImportCsvOpen(true)}
           />
         )}
 
@@ -314,6 +347,7 @@ export default function App() {
             onResetExample={handleResetExample}
             onClearAll={handleClearAll}
             onImportDatabase={handleImportDatabase}
+            onOpenImportCsv={() => setIsImportCsvOpen(true)}
             initialQuery={dbQuery}
             initialSubTab={dbSubTab}
           />
@@ -345,6 +379,15 @@ export default function App() {
         onClose={() => setMovementToDelete(null)}
         movement={movementToDelete}
         onConfirmDelete={handleDeleteMovement}
+      />
+
+      <ImportMovementsModal
+        isOpen={isImportCsvOpen}
+        onClose={() => setIsImportCsvOpen(false)}
+        nextMovementNumber={db.nm}
+        currentUser={currentUser || 'Franco'}
+        allReports={db.reportes}
+        onConfirmImport={handleConfirmImportMovements}
       />
     </div>
   );

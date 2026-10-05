@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, CheckSquare, Square, ArrowUpRight, Trash2, CheckCircle, Package, User } from 'lucide-react';
+import { Search, CheckSquare, Square, ArrowUpRight, Trash2, CheckCircle, Package, User, FileSpreadsheet } from 'lucide-react';
 import { StockReport, StockMovement, ReportType } from '../types/stock';
 import { fmtDate } from '../utils/storage';
 
@@ -9,6 +9,7 @@ interface ResolveViewProps {
   onOpenResolve: (ids: string[]) => void;
   onGoToReport: (reportId: string) => void;
   onRequestDeleteMovement: (movement: StockMovement) => void;
+  onOpenImportCsv?: () => void;
 }
 
 export const ResolveView: React.FC<ResolveViewProps> = ({
@@ -16,7 +17,8 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
   movimientos,
   onOpenResolve,
   onGoToReport,
-  onRequestDeleteMovement
+  onRequestDeleteMovement,
+  onOpenImportCsv
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('Todos');
@@ -310,16 +312,30 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
 
       {/* 2. Confirmed Movements Section */}
       <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700/80">
-        <div>
-          <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-            <span>Movimientos confirmados</span>
-            <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300">
-              {movimientos.length}
-            </span>
-          </h2>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            Historial de movimientos ejecutados con sus líneas de stock asociadas.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+              <span>Movimientos confirmados</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300">
+                {movimientos.length}
+              </span>
+            </h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Historial de movimientos ejecutados con sus líneas de stock asociadas.
+            </p>
+          </div>
+
+          {onOpenImportCsv && (
+            <button
+              type="button"
+              onClick={onOpenImportCsv}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-xs font-bold transition-colors cursor-pointer shadow-2xs shrink-0"
+              title="Cargar movimientos de stock masivos desde una plantilla CSV"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span>Importar movimientos CSV</span>
+            </button>
+          )}
         </div>
 
         {movimientos.length > 0 ? (
