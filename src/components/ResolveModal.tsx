@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, Package } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 import { StockReport, StockMovement, MovementLine, MovementAction } from '../types/stock';
 import { mid, todayDate, longDate } from '../utils/storage';
 
@@ -42,9 +42,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       const initialLines: LineState[] = [];
-
       reportsToResolve.forEach((r) => {
-        // Smart action default based on report type
         let defaultAction: MovementAction = 'Bajar';
         if (r.tipo === 'ingreso') defaultAction = 'Subir';
         if (r.tipo === 'encontrado') defaultAction = 'Subir';
@@ -66,7 +64,6 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
           });
         });
       });
-
       setLines(initialLines);
       setResp('');
       setNotas('');
@@ -130,12 +127,12 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white dark:bg-neutral-800 rounded-2xl max-w-2xl w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 max-h-[94vh] flex flex-col my-auto overflow-hidden">
+      <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-2xl w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 max-h-[94vh] flex flex-col my-auto overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-neutral-200 dark:border-neutral-700 shrink-0 bg-neutral-50/70 dark:bg-neutral-800/80">
           <div className="min-w-0 pr-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 dark:text-neutral-100 truncate">
+              <h2 className="text-base sm:text-lg font-black text-neutral-900 dark:text-neutral-100 truncate">
                 Confirmar movimiento de stock
               </h2>
               <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold shrink-0">
@@ -143,7 +140,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">
-              {longDate()} · {reportsToResolve.length} {reportsToResolve.length === 1 ? 'reporte' : 'reportes'} ({lines.length} {lines.length === 1 ? 'línea' : 'líneas de SKU'})
+              {longDate()} • {reportsToResolve.length} {reportsToResolve.length === 1 ? 'reporte' : 'reportes'} ({lines.length} {lines.length === 1 ? 'línea' : 'líneas de SKU'})
             </p>
           </div>
           <button
@@ -166,7 +163,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             {lines.map((l) => (
               <div
                 key={l.lineId}
-                className="p-3.5 sm:p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-3.5 sm:p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -182,14 +179,14 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                           ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                           : l.tipo === 'ingreso'
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                          : 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300'
+                          : 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'
                       }`}
                     >
                       {l.tipo === 'problema' ? 'Merma (-)' : l.tipo === 'ingreso' ? 'Ingreso (+)' : 'Hallazgo (+)'}
                     </span>
                   </div>
                   <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
-                    {l.desc} · Declarado: {l.maxCant} u.
+                    {l.desc} • Declarado: {l.maxCant} u.
                   </div>
                 </div>
 
@@ -197,7 +194,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                   <select
                     value={l.accion}
                     onChange={(e) => handleActionChange(l.lineId, e.target.value as MovementAction)}
-                    className="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                    className="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-bold rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 cursor-pointer"
                   >
                     {l.tipo === 'problema' ? (
                       <>
@@ -222,7 +219,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                       min="1"
                       value={l.cant}
                       onChange={(e) => handleQtyChange(l.lineId, parseInt(e.target.value, 10) || 1)}
-                      className="w-full px-2 py-1.5 text-xs font-mono font-bold text-center rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-2 py-1.5 text-xs font-mono font-bold text-center rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
                     />
                   </div>
                 </div>
@@ -232,7 +229,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
 
           {/* Responsible input */}
           <div className="pt-2">
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
               Responsable que realizó el movimiento en físico / sistema <span className="text-rose-500">*</span>
             </label>
             <input
@@ -241,7 +238,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               value={resp}
               onChange={(e) => setResp(e.target.value)}
               placeholder="Ej: Matías, Franco, etc."
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
               autoFocus
             />
             <datalist id="resp-names">
@@ -252,7 +249,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
               Observaciones del movimiento (opcional)
             </label>
             <input
@@ -260,7 +257,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               placeholder="Ej: Ajustado en depósito central estantería B4"
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500"
             />
           </div>
         </div>
@@ -270,7 +267,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+            className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
           >
             Cancelar
           </button>
@@ -278,9 +275,9 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             type="button"
             disabled={!isValid}
             onClick={handleConfirm}
-            className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
+            className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4" />
             <span>Confirmar movimiento</span>
           </button>
         </div>

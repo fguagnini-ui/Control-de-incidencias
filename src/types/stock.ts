@@ -19,9 +19,9 @@ export interface StockReport {
   sku: string;             // SKU principal o resumen (compatibilidad)
   desc: string;            // Descripción principal o resumen
   cant: number;            // Cantidad total acumulada
-  trx: string;             // N° Transacción, Remito o Factura
+  trx: string;             // Nº Transacción, Remito o Factura
   origen: string;          // Venta, Devoluciones, Depósito, Proveedor, Auditoría, Interno
-  causa: string;           // Causa del problema o Motivo de ingreso/hallazgo
+  causa: string;           // Causa simplificada: Ingreso, Devolución, Transferencia (u otro motivo)
   sol: string;             // Solución temporal / Ubicación / Observaciones
   estado: ReportStatus;    // Estado actual
   mov: string | null;      // ID de movimiento vinculado (e.g. "02-00001") o null

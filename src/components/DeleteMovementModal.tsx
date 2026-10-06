@@ -40,7 +40,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white dark:bg-neutral-800 rounded-2xl max-w-lg w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-lg w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-rose-50/50 dark:bg-rose-950/20">
           <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
@@ -52,7 +52,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+            className="p-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -67,7 +67,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
           </p>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">
               Para confirmar, escribí <span className="font-mono font-bold text-neutral-900 dark:text-white">{movement.id}</span>:
             </label>
             <input
@@ -75,7 +75,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
               value={confirmationInput}
               onChange={(e) => setConfirmationInput(e.target.value)}
               placeholder={movement.id}
-              className="w-full px-3 py-2 text-sm font-mono font-bold rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
+              className="w-full px-3 py-2 text-sm font-mono font-bold rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
               autoFocus
             />
           </div>
@@ -86,7 +86,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+            className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
           >
             Cancelar
           </button>
@@ -94,7 +94,7 @@ export const DeleteMovementModal: React.FC<DeleteMovementModalProps> = ({
             type="button"
             disabled={!isMatched}
             onClick={handleDelete}
-            className="px-4 py-2 text-xs sm:text-sm font-bold rounded-lg bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
+            className="px-4 py-2 text-xs sm:text-sm font-bold rounded-xl bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
           >
             Borrar movimiento
           </button>

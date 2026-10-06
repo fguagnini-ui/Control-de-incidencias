@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
   Search,
-  Download,
   Upload,
   RotateCcw,
   Trash2,
@@ -76,7 +75,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   });
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [responsibleFilter, setResponsibleFilter] = useState<string>('todos');
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Unified items list
@@ -154,7 +152,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   // Filtered rows
   const filteredItems = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-
     return unifiedItems.filter((item) => {
       // 1. Type Filter
       if (typeFilter === 'reportes' && item.kind !== 'reporte') return false;
@@ -213,7 +210,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -227,62 +223,74 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       }
     };
     reader.readAsText(file);
-    // Reset input
     e.target.value = '';
   };
 
-  // Export CSV of currently filtered items
+  // Export CSV of reports with all details that can be entered manually
   const handleExportCSV = () => {
     const quote = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`;
     const headers = [
-      'ID',
-      'Tipo de Registro',
+      'Tipo',
       'Fecha',
       'Responsable',
-      'SKU / Detalle',
+      'SKU',
+      'Descripcion',
       'Cantidad',
-      'Descripción / Notas',
-      'Transacción / Remito',
-      'Origen / Causa',
-      'Solución / Ubicación',
+      'Comprobante_Trx',
+      'Origen',
+      'Causa_Motivo',
+      'Observaciones',
       'Estado',
-      'Vínculo (ID)'
+      'Ubicacion'
     ];
 
-    const rows = filteredItems.map((item) => {
-      const tipoLabel =
-        item.kind === 'movimiento'
-          ? 'Movimiento de Stock'
-          : item.subTipo === 'ingreso'
-          ? 'Reporte - Ingreso (+)'
-          : item.subTipo === 'encontrado'
-          ? 'Reporte - Encontrado (+)'
-          : 'Reporte - Problema';
+    const rows: string[][] = [];
 
-      return [
-        item.id,
-        tipoLabel,
-        item.fecha,
-        item.responsable,
-        item.skuDisplay,
-        item.totalCant,
-        item.desc,
-        item.trx || '',
-        item.origenCausa || '',
-        item.sol || '',
-        item.estado,
-        item.vinculoId || ''
-      ]
-        .map(quote)
-        .join(',');
+    // Export reports (all or matching type filter if user selected a report type)
+    const targetReports = reportes.filter((r) => {
+      if (typeFilter === 'problema' && r.tipo !== 'problema') return false;
+      if (typeFilter === 'ingreso' && r.tipo !== 'ingreso') return false;
+      if (typeFilter === 'encontrado' && r.tipo !== 'encontrado') return false;
+      if (statusFilter !== 'todos' && r.estado !== statusFilter) return false;
+      if (responsibleFilter !== 'todos' && r.reporta !== responsibleFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase().trim();
+        const itemsText = (r.items || []).map((it) => `${it.sku} ${it.desc}`).join(' ');
+        const text = [r.id, r.sku, r.desc, r.reporta, r.trx, r.origen, r.causa, r.sol, itemsText].join(' ').toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
     });
 
-    const csvContent = '\uFEFF' + [headers.map(quote).join(','), ...rows].join('\n');
+    targetReports.forEach((r) => {
+      const items = r.items && r.items.length > 0
+        ? r.items
+        : [{ sku: r.sku, desc: r.desc, cant: r.cant }];
+
+      items.forEach((it) => {
+        rows.push([
+          r.tipo,
+          r.fecha,
+          r.reporta,
+          it.sku,
+          it.desc,
+          String(it.cant || 1),
+          r.trx || '',
+          r.origen || '',
+          r.causa || '',
+          r.sol || '',
+          r.estado || 'Abierto',
+          r.ubicacion || ''
+        ]);
+      });
+    });
+
+    const csvContent = '\uFEFF' + [headers.map(quote).join(','), ...rows.map((row) => row.map(quote).join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `base_de_datos_stock_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `reportes_stock_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -306,14 +314,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             <div className="flex items-center gap-2">
               <Layers className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
               <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white">
-                Base de Datos Local y GitHub
+                Base de Datos Local y Exportación
               </h2>
             </div>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1.5 flex-wrap">
-              <span>Archivo en el repositorio:</span>
-              <code className="px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 font-mono text-[11px] font-bold">
-                src/data/database.json
-              </code>
+              <span>Archivo de persistencia local y sincronización.</span>
             </p>
           </div>
 
@@ -322,18 +327,18 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             <button
               type="button"
               onClick={handleDownloadBackup}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
-              title="Descargar archivo database.json para actualizar el repositorio o guardar copia"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
+              title="Descargar archivo database.json"
             >
               <FileCode2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-              <span>Descargar database.json</span>
+              <span>Descargar JSON</span>
             </button>
 
             {/* Restore JSON Backup */}
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-xs font-semibold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-xs font-semibold transition-colors cursor-pointer"
               title="Importar un archivo database.json para restaurar datos"
             >
               <Upload className="w-3.5 h-3.5 text-neutral-500" />
@@ -344,23 +349,23 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             <button
               type="button"
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-xs font-semibold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-850 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 text-xs font-semibold transition-colors cursor-pointer"
               title="Exportar registros filtrados a formato Excel / CSV"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Exportar CSV</span>
             </button>
 
-            {/* Import Movements CSV */}
+            {/* Import Reports CSV */}
             {onOpenImportCsv && (
               <button
                 type="button"
                 onClick={onOpenImportCsv}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 hover:bg-purple-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
-                title="Cargar movimientos masivos desde una plantilla CSV"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 hover:bg-sky-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                title="Cargar reportes de stock masivos desde una plantilla CSV"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                <span>Importar Movimientos CSV</span>
+                <FileSpreadsheet className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                <span>Importar CSV</span>
               </button>
             )}
           </div>
@@ -413,12 +418,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
         {/* Row 2: Filter Pills & Selects */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
           {/* Type Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-            <span className="text-xs font-semibold text-neutral-500 mr-1 shrink-0 flex items-center gap-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 md:pb-0">
+            <span className="text-xs font-bold text-neutral-500 mr-1 shrink-0 flex items-center gap-1">
               <Filter className="w-3.5 h-3.5" />
               <span>Tipo:</span>
             </span>
-
             <button
               type="button"
               onClick={() => setTypeFilter('todos')}
@@ -430,7 +434,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             >
               Todos ({totalCount})
             </button>
-
             <button
               type="button"
               onClick={() => setTypeFilter('reportes')}
@@ -442,7 +445,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             >
               Tickets ({reportsCount})
             </button>
-
             <button
               type="button"
               onClick={() => setTypeFilter('movimientos')}
@@ -454,37 +456,34 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             >
               Movimientos ({movementsCount})
             </button>
-
             <button
               type="button"
               onClick={() => setTypeFilter('problema')}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 ${
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
                 typeFilter === 'problema'
-                  ? 'bg-rose-600 text-white font-bold'
+                  ? 'bg-rose-600 text-white'
                   : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700'
               }`}
             >
               Problemas
             </button>
-
             <button
               type="button"
               onClick={() => setTypeFilter('ingreso')}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 ${
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
                 typeFilter === 'ingreso'
-                  ? 'bg-emerald-600 text-white font-bold'
+                  ? 'bg-emerald-600 text-white'
                   : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700'
               }`}
             >
               Ingresos (+)
             </button>
-
             <button
               type="button"
               onClick={() => setTypeFilter('encontrado')}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 ${
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
                 typeFilter === 'encontrado'
-                  ? 'bg-sky-600 text-white font-bold'
+                  ? 'bg-sky-600 text-white'
                   : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700'
               }`}
             >
@@ -498,11 +497,12 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-xs text-neutral-800 dark:text-neutral-200 font-medium focus:outline-hidden cursor-pointer"
+              className="px-2.5 py-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-xs text-neutral-800 dark:text-neutral-200 font-bold focus:outline-hidden cursor-pointer"
             >
               <option value="todos">Todos los estados</option>
               <option value="Abierto">Abierto</option>
-              <option value="En Proceso">En Proceso</option>
+              <option value="Notificado">Notificado</option>
+              <option value="En revisión">En revisión</option>
               <option value="Cerrado">Cerrado</option>
               <option value="Cancelado">Cancelado</option>
               <option value="Confirmado">Confirmado</option>
@@ -513,7 +513,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
               <select
                 value={responsibleFilter}
                 onChange={(e) => setResponsibleFilter(e.target.value)}
-                className="px-2.5 py-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-xs text-neutral-800 dark:text-neutral-200 font-medium focus:outline-hidden cursor-pointer"
+                className="px-2.5 py-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-xs text-neutral-800 dark:text-neutral-200 font-bold focus:outline-hidden cursor-pointer"
               >
                 <option value="todos">Todos los responsables</option>
                 {responsiblesList.map((resp) => (
@@ -584,7 +584,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
               ) : (
                 filteredItems.map((item) => {
                   const isMovement = item.kind === 'movimiento';
-
                   return (
                     <tr
                       key={`${item.kind}-${item.id}`}
@@ -744,12 +743,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
           <div>
             Mostrando <strong>{filteredItems.length}</strong> de <strong>{totalCount}</strong> registros en la base de datos.
           </div>
-
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onResetExample}
-              className="inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+              className="inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer font-bold"
               title="Restablecer datos originales"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -759,7 +757,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             <button
               type="button"
               onClick={onClearAll}
-              className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-medium"
+              className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 hover:underline cursor-pointer font-bold"
               title="Borrar todos los registros"
             >
               <Trash2 className="w-3.5 h-3.5" />

@@ -46,7 +46,7 @@ export function loadDatabase(): StockDatabase {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getSeedData();
     const parsed = JSON.parse(raw);
-    
+
     // Migration: if stored with old 'problemas' key
     let reportesRaw: any[] = [];
     if (Array.isArray(parsed.reportes)) {
@@ -67,11 +67,10 @@ export function loadDatabase(): StockDatabase {
           cant: typeof r.cant === 'number' && r.cant > 0 ? r.cant : 1
         }];
       }
-
       const totalCant = items.reduce((sum: number, it: any) => sum + (Number(it.cant) || 1), 0);
       const firstSku = items[0]?.sku || r.sku || 'SKU';
-      const summaryDesc = items.length === 1 
-        ? (items[0]?.desc || r.desc || '') 
+      const summaryDesc = items.length === 1
+        ? (items[0]?.desc || r.desc || '')
         : `${items[0]?.desc || r.desc || 'Producto'} (+${items.length - 1} más)`;
 
       return {
@@ -80,7 +79,10 @@ export function loadDatabase(): StockDatabase {
         items,
         sku: firstSku,
         desc: r.desc || summaryDesc,
-        cant: totalCant
+        cant: totalCant,
+        origen: r.origen || 'Depósito',
+        causa: r.causa || 'Ingreso',
+        estado: r.estado || 'Abierto'
       };
     });
 
@@ -101,7 +103,6 @@ export function loadDatabase(): StockDatabase {
 
 export function saveDatabase(db: StockDatabase): void {
   try {
-    // Keep both 'reportes' and 'problemas' for backwards compatibility
     const toStore = {
       ...db,
       problemas: db.reportes
@@ -130,7 +131,6 @@ export function parseDatabaseJSON(text: string): StockDatabase {
   if (!parsed || typeof parsed !== 'object') {
     throw new Error('El archivo no tiene un formato JSON válido.');
   }
-
   const reportes = Array.isArray(parsed.reportes) ? parsed.reportes : [];
   const movimientos = Array.isArray(parsed.movimientos) ? parsed.movimientos : [];
 

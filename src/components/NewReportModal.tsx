@@ -14,35 +14,16 @@ interface NewReportModalProps {
 }
 
 const ORIGEN_OPTIONS: Record<ReportType, string[]> = {
-  problema: ['Venta', 'Devoluciones', 'Depósito', 'Empaque', 'Interno', 'Otro'],
-  ingreso: ['Proveedor', 'Depósito central', 'Compras', 'Importación', 'Fábrica'],
-  encontrado: ['Depósito', 'Mostrador', 'Área de embalaje', 'Auditoría física', 'Góndola']
+  problema: ['Devoluciones', 'Venta', 'Depósito', 'Empaque', 'Interno', 'Otro'],
+  ingreso: ['Proveedor', 'Depósito central', 'Compras', 'Importación', 'Fábrica', 'Otro'],
+  encontrado: ['Depósito', 'Mostrador', 'Área de embalaje', 'Auditoría física', 'Góndola', 'Otro']
 };
 
+// Opciones de causa simplificadas según requerimientos: Ingreso, Devolución, Transferencia
 const CAUSA_OPTIONS: Record<ReportType, string[]> = {
-  problema: [
-    'Roto / Dañado',
-    'Faltante en pedido',
-    'Producto equivocado',
-    'Vencido / Caducado',
-    'Uso interno',
-    'Daño en transporte',
-    'Otro'
-  ],
-  ingreso: [
-    'Recepción de compra / Proveedor',
-    'Remito de mercadería nueva',
-    'Transferencia entre sucursales',
-    'Reposición de taller',
-    'Devolución de cliente apta para reingreso'
-  ],
-  encontrado: [
-    'Hallado en estantería sin registrar',
-    'Sobrante de conteo físico',
-    'Reingreso por auditoría',
-    'Mercadería sin etiquetar',
-    'Reubicación de stock olvidado'
-  ]
+  problema: ['Devolución', 'Transferencia', 'Ingreso', 'Roto / Dañado', 'Faltante en pedido', 'Vencido / Caducado', 'Otro'],
+  ingreso: ['Ingreso', 'Devolución', 'Transferencia', 'Recepción de compra / Proveedor'],
+  encontrado: ['Transferencia', 'Ingreso', 'Devolución', 'Hallado en estantería sin registrar']
 };
 
 export const NewReportModal: React.FC<NewReportModalProps> = ({
@@ -55,7 +36,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
 }) => {
   const [step, setStep] = useState<1 | 2>(initialType ? 2 : 1);
   const [tipo, setTipo] = useState<ReportType>(initialType || 'problema');
-  
+
   // Multi-SKU Items list
   const [items, setItems] = useState<ReportItem[]>([
     { sku: '', desc: '', cant: 1 }
@@ -162,7 +143,6 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
         setError(`Falta ingresar la descripción en el producto #${i + 1} (${cleanSku}).`);
         return;
       }
-
       cleanItems.push({
         sku: cleanSku,
         desc: cleanDesc,
@@ -171,10 +151,9 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
     }
 
     setError(null);
-
     const firstSku = cleanItems[0].sku;
-    const summaryDesc = cleanItems.length === 1 
-      ? cleanItems[0].desc 
+    const summaryDesc = cleanItems.length === 1
+      ? cleanItems[0].desc
       : `${cleanItems[0].desc} (+${cleanItems.length - 1} ${cleanItems.length - 1 === 1 ? 'producto más' : 'productos más'})`;
 
     onSubmit({
@@ -213,7 +192,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
       : `${previewItems[0]?.desc || 'Producto'} (+${previewItems.length - 1} más)`,
     trx: trx.trim() || (tipo === 'ingreso' ? 'REM-001' : '#TRX-001'),
     origen: origen || 'Depósito',
-    causa: causa || 'General',
+    causa: causa || 'Ingreso',
     cant: totalUnitsCount,
     sol: sol.trim() || '',
     ubicacion: ubicacion.trim() || '',
@@ -228,7 +207,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white dark:bg-neutral-800 rounded-2xl max-w-4xl w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 max-h-[94vh] flex flex-col my-auto overflow-hidden">
+      <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-4xl w-full shadow-2xl border border-neutral-200 dark:border-neutral-700 max-h-[94vh] flex flex-col my-auto overflow-hidden">
         {/* Modal Top Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-neutral-200 dark:border-neutral-700 shrink-0 bg-neutral-50/70 dark:bg-neutral-800/80">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -244,7 +223,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
               </button>
             )}
             <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 dark:text-neutral-100 flex items-center gap-2 truncate">
+              <h2 className="text-base sm:text-lg font-black text-neutral-900 dark:text-neutral-100 flex items-center gap-2 truncate">
                 <span>Nuevo reporte</span>
                 <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 shrink-0">
                   {pid(nextIdNumber)}
@@ -292,10 +271,10 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectType('problema')}
-                  className="p-4 sm:p-5 text-left rounded-xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-rose-500 dark:hover:border-rose-500 bg-white dark:bg-neutral-800/60 hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition-all flex flex-col justify-between group cursor-pointer"
+                  className="p-4 sm:p-5 text-left rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-rose-500 dark:hover:border-rose-500 bg-white dark:bg-neutral-800/60 hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                       <AlertCircle className="w-5 h-5" />
                     </div>
                     <div className="flex items-center justify-between gap-1">
@@ -310,7 +289,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                       Productos rotos, faltantes en pedidos, mercadería vencida o dañada que requiere baja o reclamo.
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center justify-between">
                     <span>Cargar problema</span>
                     <span>→</span>
                   </div>
@@ -320,10 +299,10 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectType('ingreso')}
-                  className="p-4 sm:p-5 text-left rounded-xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-emerald-500 dark:hover:border-emerald-500 bg-white dark:bg-neutral-800/60 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20 transition-all flex flex-col justify-between group cursor-pointer"
+                  className="p-4 sm:p-5 text-left rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-emerald-500 dark:hover:border-emerald-500 bg-white dark:bg-neutral-800/60 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20 transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                       <ArrowDownToLine className="w-5 h-5" />
                     </div>
                     <div className="flex items-center justify-between gap-1">
@@ -338,7 +317,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                       Recepción de compras a proveedores, remitos recibidos con varios SKUs, reposición o ingresos nuevos.
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
                     <span>Cargar ingreso</span>
                     <span>→</span>
                   </div>
@@ -348,17 +327,17 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectType('encontrado')}
-                  className="p-4 sm:p-5 text-left rounded-xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-teal-500 dark:hover:border-teal-500 bg-white dark:bg-neutral-800/60 hover:bg-teal-50/30 dark:hover:bg-teal-950/20 transition-all flex flex-col justify-between group cursor-pointer"
+                  className="p-4 sm:p-5 text-left rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 hover:border-sky-500 dark:hover:border-sky-500 bg-white dark:bg-neutral-800/60 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                       <Search className="w-5 h-5" />
                     </div>
                     <div className="flex items-center justify-between gap-1">
-                      <span className="font-bold text-neutral-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 text-sm">
+                      <span className="font-bold text-neutral-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 text-sm">
                         Producto encontrado
                       </span>
-                      <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300">
+                      <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">
                         Suma (+)
                       </span>
                     </div>
@@ -366,7 +345,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                       Mercadería hallada en depósito que no figuraba en inventario físico, sobrantes o sin registrar.
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-700 text-xs font-bold text-sky-600 dark:text-sky-400 flex items-center justify-between">
                     <span>Cargar hallazgo</span>
                     <span>→</span>
                   </div>
@@ -381,7 +360,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
               {/* Form Section */}
               <div className="lg:col-span-7 space-y-4">
                 {/* Type Switcher */}
-                <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-xl text-xs font-semibold">
+                <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-xl text-xs font-bold">
                   <button
                     type="button"
                     onClick={() => setTipo('problema')}
@@ -411,7 +390,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                     onClick={() => setTipo('encontrado')}
                     className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       tipo === 'encontrado'
-                        ? 'bg-white dark:bg-neutral-800 text-teal-600 dark:text-teal-400 shadow-xs'
+                        ? 'bg-white dark:bg-neutral-800 text-sky-600 dark:text-sky-400 shadow-xs'
                         : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
                     }`}
                   >
@@ -421,26 +400,26 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                 </div>
 
                 {error && (
-                  <div className="p-3 text-xs rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                  <div className="p-3 text-xs rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {/* Section 1: General Info (Remito/Trx, Reporter, Origin, Cause) */}
-                <div className="p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-700/80 bg-neutral-50/50 dark:bg-neutral-900/30 space-y-3">
+                <div className="p-3.5 rounded-2xl border border-neutral-200 dark:border-neutral-700/80 bg-neutral-50/50 dark:bg-neutral-900/30 space-y-3">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Datos del comprobante / origen
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
                         {tipo === 'ingreso'
-                          ? 'N° Remito / Factura'
+                          ? 'Nº Remito / Factura'
                           : tipo === 'encontrado'
                           ? 'Transacción / Ref. (opcional)'
-                          : 'N° Transacción / Ticket'}
+                          : 'Nº Transacción / Ticket'}
                       </label>
                       <input
                         type="text"
@@ -453,12 +432,12 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                             ? 'Ej: #AUD-2024-B'
                             : 'Ej: #200006548136'
                         }
-                        className="w-full px-3 py-2 text-xs sm:text-sm font-mono rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 text-xs sm:text-sm font-mono rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
                         {tipo === 'ingreso' ? 'Quién recibe / ingresa' : 'Quién reporta'}{' '}
                         <span className="text-rose-500">*</span>
                       </label>
@@ -468,7 +447,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                         value={reporta}
                         onChange={(e) => setReporta(e.target.value)}
                         placeholder="Ej: Franco, Matías..."
-                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
                       />
                       <datalist id="reporter-list">
                         {reporterNames.map((name) => (
@@ -480,7 +459,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
                         {tipo === 'ingreso'
                           ? 'Procedencia / Proveedor'
                           : tipo === 'encontrado'
@@ -490,7 +469,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                       <select
                         value={origen}
                         onChange={(e) => setOrigen(e.target.value)}
-                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
                       >
                         {ORIGEN_OPTIONS[tipo].map((opt) => (
                           <option key={opt} value={opt}>
@@ -501,17 +480,13 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
-                        {tipo === 'ingreso'
-                          ? 'Motivo de ingreso'
-                          : tipo === 'encontrado'
-                          ? 'Motivo del hallazgo'
-                          : 'Causa'}
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
+                        Motivo / Causa (simplificada)
                       </label>
                       <select
                         value={causa}
                         onChange={(e) => setCausa(e.target.value)}
-                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
                       >
                         {CAUSA_OPTIONS[tipo].map((opt) => (
                           <option key={opt} value={opt}>
@@ -531,7 +506,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                         Productos / SKUs a registrar
                       </span>
                       <span className="ml-2 font-mono text-[11px] font-semibold text-neutral-500">
-                        ({totalItemsCount} {totalItemsCount === 1 ? 'producto' : 'productos'} · {totalUnitsCount} u. total)
+                        ({totalItemsCount} {totalItemsCount === 1 ? 'producto' : 'productos'} • {totalUnitsCount} u. total)
                       </span>
                     </div>
 
@@ -550,7 +525,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                     {items.map((it, idx) => (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 shadow-2xs space-y-2.5"
+                        className="p-3.5 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 shadow-2xs space-y-2.5"
                       >
                         <div className="flex items-center justify-between text-xs pb-1 border-b border-neutral-100 dark:border-neutral-700/60">
                           <span className="font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
@@ -575,7 +550,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                           {/* SKU */}
                           <div className="sm:col-span-4">
-                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                            <label className="block text-[11px] font-bold text-neutral-500 mb-1">
                               SKU <span className="text-rose-500">*</span>
                             </label>
                             <input
@@ -589,7 +564,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
 
                           {/* Descripción */}
                           <div className="sm:col-span-5">
-                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                            <label className="block text-[11px] font-bold text-neutral-500 mb-1">
                               Descripción / Nombre <span className="text-rose-500">*</span>
                             </label>
                             <input
@@ -603,7 +578,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
 
                           {/* Cantidad */}
                           <div className="sm:col-span-3">
-                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                            <label className="block text-[11px] font-bold text-neutral-500 mb-1">
                               {tipo === 'problema' ? 'Cant. (-)' : 'Cant. (+)'}
                             </label>
                             <div className="relative">
@@ -626,17 +601,17 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    className="w-full py-2 border border-dashed border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500 rounded-xl text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="w-full py-2 border border-dashed border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>+ Agregar otro producto al remito / reporte</span>
                   </button>
                 </div>
 
-                {/* Section 3: Notes & Initial Status (sin ubicación) */}
+                {/* Section 3: Notes & Initial Status */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
+                    <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
                       Observaciones (opcional)
                     </label>
                     <input
@@ -644,18 +619,18 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                       value={sol}
                       onChange={(e) => setSol(e.target.value)}
                       placeholder="Ej: Verificado estado, observaciones o notas..."
-                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">
+                    <label className="block text-xs font-bold text-neutral-600 dark:text-neutral-300 mb-1">
                       Estado inicial
                     </label>
                     <select
                       value={estado}
                       onChange={(e) => setEstado(e.target.value as ReportStatus)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
                     >
                       <option value="Abierto">Abierto</option>
                       <option value="Notificado">Notificado</option>
@@ -669,7 +644,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowMobilePreview(!showMobilePreview)}
-                    className="w-full py-2 px-3 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2 px-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Eye className="w-4 h-4" />
                     <span>{showMobilePreview ? 'Ocultar vista previa' : 'Ver vista previa del ticket'}</span>
@@ -705,7 +680,7 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
               >
                 Cancelar
               </button>
@@ -718,22 +693,23 @@ export const NewReportModal: React.FC<NewReportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                className="px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
               >
                 ← Tipo
               </button>
+
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                  className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                  className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
                 >
                   Registrar reporte ({totalUnitsCount} u.)
                 </button>

@@ -1,24 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { Search, CheckSquare, Square, ArrowUpRight, Trash2, CheckCircle, Package, User, FileSpreadsheet } from 'lucide-react';
+import {
+  Search,
+  CheckSquare,
+  Square,
+  ArrowUpRight,
+  Trash2,
+  CheckCircle2,
+  Package,
+  FileSpreadsheet,
+  Boxes
+} from 'lucide-react';
 import { StockReport, StockMovement, ReportType } from '../types/stock';
 import { fmtDate } from '../utils/storage';
 
-interface ResolveViewProps {
+interface GestionViewProps {
   reportes: StockReport[];
   movimientos: StockMovement[];
   onOpenResolve: (ids: string[]) => void;
   onGoToReport: (reportId: string) => void;
   onRequestDeleteMovement: (movement: StockMovement) => void;
-  onOpenImportCsv?: () => void;
 }
 
-export const ResolveView: React.FC<ResolveViewProps> = ({
+export const GestionView: React.FC<GestionViewProps> = ({
   reportes,
   movimientos,
   onOpenResolve,
   onGoToReport,
-  onRequestDeleteMovement,
-  onOpenImportCsv
+  onRequestDeleteMovement
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('Todos');
@@ -63,44 +71,47 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* 1. Pending Section */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-              <span>Pendientes de movimiento</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
-                {pendingReports.length}
-              </span>
-            </h2>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Seleccioná uno o más reportes para generar un movimiento de stock consolidado.
-            </p>
-          </div>
+      {/* 4. VISTA: GESTIÓN - Título visible "Gestión" arriba de la barra de búsqueda */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">
+            <span>Gestión</span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+              {pendingReports.length} pendientes
+            </span>
+          </h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+            Resolución de tickets pendientes y generación de movimientos de stock consolidados.
+          </p>
+        </div>
 
+        <div className="flex items-center gap-2">
           <button
             type="button"
             disabled={selectedIds.size === 0}
             onClick={() => onOpenResolve(Array.from(selectedIds))}
-            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 disabled:opacity-35 disabled:cursor-not-allowed transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 disabled:opacity-35 disabled:cursor-not-allowed transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4" />
             <span>
-              Resolver seleccionados {selectedIds.size > 0 && `(${selectedIds.size})`}
+              Gestionar seleccionados {selectedIds.size > 0 && `(${selectedIds.size})`}
             </span>
           </button>
         </div>
+      </div>
 
+      {/* 1. Pending Section */}
+      <div className="space-y-4">
         {/* Filter bar */}
-        <div className="bg-white dark:bg-neutral-800 p-3 sm:p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white dark:bg-neutral-800 p-3 sm:p-3.5 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filtrar pendientes por SKU, transacción, ID, responsable…"
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 bg-neutral-50/50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+              placeholder="Filtrar pendientes por SKU, transacción, ID, responsable..."
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-neutral-300 dark:border-neutral-600 bg-neutral-50/50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
             />
           </div>
 
@@ -109,7 +120,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
               type="button"
               onClick={handleToggleSelectAll}
               disabled={filteredPending.length === 0}
-              className="px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 font-semibold cursor-pointer disabled:opacity-40 whitespace-nowrap"
+              className="px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 font-bold cursor-pointer disabled:opacity-40 whitespace-nowrap"
             >
               {selectedIds.size === filteredPending.length && filteredPending.length > 0
                 ? 'Deseleccionar todos'
@@ -117,13 +128,13 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
             </button>
 
             {/* Type selector */}
-            <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-900 p-0.5 rounded-lg overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-900 p-0.5 rounded-lg overflow-x-auto scrollbar-none">
               {['Todos', 'problema', 'ingreso', 'encontrado'].map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTypeFilter(t)}
-                  className={`px-2 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                  className={`px-2 py-1 rounded-md text-[11px] font-bold whitespace-nowrap cursor-pointer ${
                     typeFilter === t
                       ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                       : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
@@ -143,7 +154,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
         </div>
 
         {/* Pending List Table / Items */}
-        <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 divide-y divide-neutral-100 dark:divide-neutral-700/60 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 divide-y divide-neutral-100 dark:divide-neutral-700/60 overflow-hidden shadow-xs">
           {filteredPending.length > 0 ? (
             filteredPending.map((p) => {
               const isSelected = selectedIds.has(p.id);
@@ -155,8 +166,8 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                   key={p.id}
                   className={`p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-colors ${
                     isSelected
-                      ? 'bg-sky-50/60 dark:bg-sky-950/25'
-                      : 'hover:bg-neutral-50/60 dark:hover:bg-neutral-750/30'
+                      ? 'bg-sky-50/70 dark:bg-sky-950/30'
+                      : 'hover:bg-neutral-50/70 dark:hover:bg-neutral-750/30'
                   }`}
                 >
                   {/* Left: Checkbox + Info */}
@@ -177,7 +188,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
 
                     {/* Main Info */}
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      {/* 1. Categoría arriba seguida del número de movimiento */}
+                      {/* 1. Categoría arriba seguida del número de reporte */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wide inline-flex items-center gap-1 ${
@@ -185,44 +196,41 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                               ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900'
                               : p.tipo === 'ingreso'
                               ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900'
-                              : 'bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-900'
+                              : 'bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-900'
                           }`}
                         >
                           {isProblema ? 'Merma / Problema (-)' : p.tipo === 'ingreso' ? 'Ingreso (+)' : 'Encontrado (+)'}
                         </span>
-
                         <span className="font-mono font-extrabold text-sm text-neutral-900 dark:text-white">
                           {p.id}
                         </span>
-
                         {p.trx && (
                           <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500">
-                            · {p.trx}
+                            • {p.trx}
                           </span>
                         )}
-
                         {p.fecha && (
-                          <span className="text-xs text-neutral-400 dark:text-neutral-500">
-                            · {fmtDate(p.fecha)}
+                          <span className="text-xs text-neutral-400 dark:text-neutral-500 font-mono">
+                            • {fmtDate(p.fecha)}
                           </span>
                         )}
                       </div>
 
-                      {/* 2. SKUs: primero cuántos SKUs (si son más de uno) y después el detalle */}
-                      <div className="flex items-center gap-2 flex-wrap text-[16px]">
+                      {/* 2. SKUs */}
+                      <div className="flex items-center gap-2 flex-wrap text-sm">
                         {hasMultiSku ? (
                           <>
-                            <span className="font-mono font-extrabold text-[16px] px-2.5 py-0.5 rounded text-white shadow-xs bg-[#5e5e5e]">
+                            <span className="font-mono font-extrabold text-xs px-2.5 py-0.5 rounded text-white shadow-xs bg-neutral-700">
                               {p.items.length} SKUs
                             </span>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {p.items.map((it, idx) => (
                                 <span
                                   key={idx}
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700/70 text-[16px] font-mono text-neutral-800 dark:text-neutral-200 border border-neutral-200/80 dark:border-neutral-600/50"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-neutral-100 dark:bg-neutral-700/70 font-mono text-xs text-neutral-800 dark:text-neutral-200 border border-neutral-200/80 dark:border-neutral-600/50"
                                 >
                                   <span className="font-bold">{it.sku}</span>
-                                  <span className="text-neutral-500 dark:text-neutral-400 font-sans text-xs">
+                                  <span className="text-neutral-500 dark:text-neutral-400 font-sans text-[11px]">
                                     ({it.cant}u)
                                   </span>
                                 </span>
@@ -231,7 +239,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                           </>
                         ) : (
                           <div className="flex items-center gap-1.5 font-mono">
-                            <span className="font-bold text-[16px] text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-750 px-2.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                            <span className="font-extrabold text-sm text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-750 px-2.5 py-0.5 rounded-lg border border-neutral-200 dark:border-neutral-700">
                               {p.sku || (p.items && p.items[0]?.sku) || 'S/N'}
                             </span>
                             <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 font-sans">
@@ -241,30 +249,26 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                         )}
                       </div>
 
-                      {/* 3. Por último: quién reportó y el detalle de qué es */}
+                      {/* 3. Quién reportó y detalle */}
                       <div className="flex items-center gap-2 flex-wrap text-xs text-neutral-600 dark:text-neutral-400 pt-0.5">
                         <span className="inline-flex items-center gap-1 font-medium text-neutral-700 dark:text-neutral-300">
                           <span className="text-neutral-400 dark:text-neutral-500 font-normal">Reportó:</span>
-                          <strong className="font-semibold text-neutral-900 dark:text-neutral-100">{p.reporta}</strong>
+                          <strong className="font-bold text-neutral-900 dark:text-neutral-100">{p.reporta}</strong>
                         </span>
-
-                        <span className="text-neutral-300 dark:text-neutral-600">·</span>
-
+                        <span className="text-neutral-300 dark:text-neutral-600">•</span>
                         <span className="text-neutral-800 dark:text-neutral-200 font-medium">
                           {p.desc}
                         </span>
-
                         {p.causa && (
                           <>
-                            <span className="text-neutral-300 dark:text-neutral-600">·</span>
+                            <span className="text-neutral-300 dark:text-neutral-600">•</span>
                             <span className="text-neutral-500 dark:text-neutral-400 italic">
                               {p.causa}
                             </span>
                           </>
                         )}
-
                         {p.origen && (
-                          <span className="text-[11px] px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300">
                             {p.origen}
                           </span>
                         )}
@@ -272,10 +276,10 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Right (or bottom on mobile): Quantity & Direct Resolve Button */}
+                  {/* Right (or bottom on mobile): Quantity & Action Button */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-700/40">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-semibold text-neutral-400 sm:hidden">
+                      <span className="text-[11px] font-bold text-neutral-400 sm:hidden">
                         Total unidades:
                       </span>
                       <span
@@ -293,9 +297,9 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenResolve([p.id])}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
                     >
-                      Resolver
+                      Gestionar
                     </button>
                   </div>
                 </div>
@@ -324,18 +328,6 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
               Historial de movimientos ejecutados con sus líneas de stock asociadas.
             </p>
           </div>
-
-          {onOpenImportCsv && (
-            <button
-              type="button"
-              onClick={onOpenImportCsv}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-xs font-bold transition-colors cursor-pointer shadow-2xs shrink-0"
-              title="Cargar movimientos de stock masivos desde una plantilla CSV"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span>Importar movimientos CSV</span>
-            </button>
-          )}
         </div>
 
         {movimientos.length > 0 ? (
@@ -343,13 +335,13 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
             {[...movimientos].reverse().map((m) => (
               <div
                 key={m.id}
-                className="bg-white dark:bg-neutral-800 p-4 sm:p-5 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xs flex flex-col justify-between"
+                className="bg-white dark:bg-neutral-800 p-4 sm:p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xs flex flex-col justify-between"
               >
                 <div>
                   {/* Top Bar */}
                   <div className="flex items-start justify-between gap-3 border-b border-neutral-100 dark:border-neutral-700/60 pb-3">
                     <div>
-                      <div className="text-[11px] font-semibold uppercase text-neutral-400">
+                      <div className="text-[11px] font-bold uppercase text-neutral-400">
                         Id movimiento
                       </div>
                       <div className="text-base font-extrabold font-mono text-neutral-900 dark:text-white">
@@ -360,7 +352,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                       <div className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
                         Resp: {m.resp}
                       </div>
-                      <div className="text-xs text-neutral-400 mt-0.5">{fmtDate(m.fecha)}</div>
+                      <div className="text-xs text-neutral-400 font-mono mt-0.5">{fmtDate(m.fecha)}</div>
                     </div>
                   </div>
 
@@ -369,7 +361,6 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       <span>Confirmado</span>
                     </span>
-
                     <button
                       type="button"
                       onClick={() => onRequestDeleteMovement(m)}
@@ -401,18 +392,16 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
                             </div>
                             <div className="text-neutral-500 truncate">{line.desc}</div>
                           </div>
-
                           <div className="flex items-center gap-2 shrink-0">
                             <button
                               type="button"
                               onClick={() => onGoToReport(line.pid)}
-                              className="text-sky-600 dark:text-sky-400 hover:underline font-mono font-semibold flex items-center gap-0.5 cursor-pointer text-[11px]"
+                              className="text-sky-600 dark:text-sky-400 hover:underline font-mono font-bold flex items-center gap-0.5 cursor-pointer text-[11px]"
                               title="Ver ticket de este reporte"
                             >
                               <span>{line.pid}</span>
                               <ArrowUpRight className="w-3 h-3" />
                             </button>
-
                             <span
                               className={`px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border ${
                                 isUp
@@ -432,7 +421,7 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 bg-white dark:bg-neutral-800 rounded-xl border border-dashed border-neutral-200 dark:border-neutral-700 text-xs text-neutral-400">
+          <div className="text-center py-10 bg-white dark:bg-neutral-800 rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-700 text-xs text-neutral-400">
             Todavía no se confirmó ningún movimiento.
           </div>
         )}
@@ -440,3 +429,5 @@ export const ResolveView: React.FC<ResolveViewProps> = ({
     </div>
   );
 };
+
+export const ResolveView = GestionView;

@@ -37,17 +37,17 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-neutral-100 dark:bg-neutral-900 transition-colors">
-      <div className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl p-6 sm:p-8 space-y-6">
+      <div className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-200 dark:border-neutral-700 shadow-xl p-6 sm:p-8 space-y-6">
         {/* Brand & Title */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm mb-1">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm mb-1">
             <Boxes className="w-6 h-6" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-neutral-900 dark:text-white">
             Tickets de Stock
           </h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            Ingreso restringido para control de inventario
+            Ingreso restringido para control de inventario y movimientos
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300">
               Usuario
             </label>
             <input
@@ -83,7 +83,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+            <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300">
               Contraseña
             </label>
             <div className="relative">
@@ -92,7 +92,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 className="w-full pl-3.5 pr-10 py-2.5 text-sm rounded-xl border border-neutral-300 dark:border-neutral-600 bg-neutral-50/50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white focus:outline-hidden transition-all font-mono"
               />
               <button
@@ -118,7 +118,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
         </form>
 
         <div className="pt-2 border-t border-neutral-100 dark:border-neutral-700/60 text-center text-[11px] text-neutral-400 dark:text-neutral-500">
-          Mecano Tools · Sistema de tickets y movimientos de stock
+          Mecano Tools • Sistema de tickets y movimientos de stock
         </div>
       </div>
     </div>

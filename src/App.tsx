@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StockDatabase, StockReport, StockMovement, ReportStatus, ReportType } from './types/stock';
 import { loadDatabase, saveDatabase, pid } from './utils/storage';
-import { Header } from './components/Header';
+import { Sidebar } from './components/Sidebar';
+import { MobileHeader, MobileBottomNav } from './components/MobileNav';
 import { ReportsView } from './components/ReportsView';
-import { ResolveView } from './components/ResolveView';
+import { GestionView } from './components/ResolveView';
 import { DatabaseView } from './components/DatabaseView';
 import { NewReportModal } from './components/NewReportModal';
 import { ResolveModal } from './components/ResolveModal';
 import { DeleteMovementModal } from './components/DeleteMovementModal';
-import { ImportMovementsModal } from './components/ImportMovementsModal';
+import { ImportReportsModal } from './components/ImportReportsModal';
 import { LoginGate } from './components/LoginGate';
 
 export default function App() {
   const [db, setDb] = useState<StockDatabase>(() => loadDatabase());
-  const [currentTab, setCurrentTab] = useState<'reportes' | 'resolver' | 'database'>('reportes');
+  const [currentTab, setCurrentTab] = useState<'reportes' | 'gestion' | 'database'>('reportes');
 
   // Modals state
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
@@ -47,7 +48,6 @@ export default function App() {
 
   // Toast notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
   }, []);
@@ -58,7 +58,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  // Dark mode
+  // Dark mode with localStorage persistence
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('tickets_stock_theme');
@@ -121,7 +121,6 @@ export default function App() {
       np: prev.np + 1,
       reportes: [...prev.reportes, newReport]
     }));
-
     showToast(`Reporte ${nextId} creado con éxito`);
   };
 
@@ -146,10 +145,7 @@ export default function App() {
   const handleConfirmMovement = (movement: StockMovement) => {
     const resolvedReportIds = Array.from(new Set(movement.lineas.map((l) => l.pid).filter(Boolean)));
     setDb((prev) => {
-      // 1. Add movement
       const nextMovements = [...prev.movimientos, movement];
-
-      // 2. Mark corresponding reports as Cerrado and link movement ID
       const nextReports = prev.reportes.map((r) => {
         if (resolvedReportIds.includes(r.id)) {
           return {
@@ -160,7 +156,6 @@ export default function App() {
         }
         return r;
       });
-
       return {
         ...prev,
         nm: prev.nm + 1,
@@ -168,13 +163,11 @@ export default function App() {
         movimientos: nextMovements
       };
     });
-
-    showToast(`Movimiento ${movement.id} generado y tickets resueltos`);
+    showToast(`Movimiento ${movement.id} generado con éxito`);
   };
 
   const handleDeleteMovement = (movementId: string) => {
     setDb((prev) => {
-      // Unlink reports
       const nextReports = prev.reportes.map((r) => {
         if (r.mov === movementId) {
           return {
@@ -185,19 +178,15 @@ export default function App() {
         }
         return r;
       });
-
-      // Filter out movement
       const nextMovements = prev.movimientos.filter((m) => m.id !== movementId);
-
       return {
         ...prev,
         reportes: nextReports,
         movimientos: nextMovements
       };
     });
-
     setMovementToDelete(null);
-    showToast(`Movimiento ${movementId} eliminado`);
+    showToast(`Movimiento ${movementId} anulado`);
   };
 
   const handleResetExample = () => {
@@ -230,34 +219,70 @@ export default function App() {
     showToast(`Base de datos importada (${newDb.reportes.length} tickets, ${newDb.movimientos.length} movimientos)`);
   };
 
-  const handleConfirmImportMovements = (newMovements: StockMovement[], resolvedReportIds: string[]) => {
+  const handleConfirmImportReports = (newReports: StockReport[]) => {
     setDb((prev) => {
-      const nextMovements = [...prev.movimientos, ...newMovements];
-
-      const nextReports = prev.reportes.map((r) => {
-        if (resolvedReportIds.includes(r.id)) {
-          const linkedMov = newMovements.find((m) => m.lineas.some((l) => l.pid === r.id));
-          return {
-            ...r,
-            estado: 'Cerrado' as ReportStatus,
-            mov: linkedMov ? linkedMov.id : r.mov
-          };
-        }
-        return r;
-      });
-
-      const nextNm = prev.nm + newMovements.length;
-
+      const nextReports = [...prev.reportes, ...newReports];
+      const nextNp = prev.np + newReports.length;
       return {
         ...prev,
-        nm: nextNm,
-        reportes: nextReports,
-        movimientos: nextMovements
+        np: nextNp,
+        reportes: nextReports
       };
     });
+    showToast(`${newReports.length} reportes importados con éxito`);
+  };
 
-    const totalLines = newMovements.reduce((acc, m) => acc + m.lineas.length, 0);
-    showToast(`${newMovements.length} movimientos importados (${totalLines} líneas de stock)`);
+  const handleExportReportsCsv = () => {
+    const quote = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const headers = [
+      'Tipo',
+      'Fecha',
+      'Responsable',
+      'SKU',
+      'Descripcion',
+      'Cantidad',
+      'Comprobante_Trx',
+      'Origen',
+      'Causa_Motivo',
+      'Observaciones',
+      'Estado',
+      'Ubicacion'
+    ];
+
+    const rows: string[][] = [];
+    db.reportes.forEach((r) => {
+      const items = r.items && r.items.length > 0
+        ? r.items
+        : [{ sku: r.sku, desc: r.desc, cant: r.cant }];
+
+      items.forEach((it) => {
+        rows.push([
+          r.tipo,
+          r.fecha,
+          r.reporta,
+          it.sku,
+          it.desc,
+          String(it.cant || 1),
+          r.trx || '',
+          r.origen || '',
+          r.causa || '',
+          r.sol || '',
+          r.estado || 'Abierto',
+          r.ubicacion || ''
+        ]);
+      });
+    });
+
+    const csvContent = '\uFEFF' + [headers.map(quote).join(','), ...rows.map((row) => row.map(quote).join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `reportes_stock_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exportados ${db.reportes.length} reportes a CSV`);
   };
 
   const handleGoToReport = (reportId: string) => {
@@ -285,7 +310,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-100/70 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
+    <div className="min-h-screen flex flex-col md:flex-row bg-neutral-100/70 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
       {/* Toast Notification Banner */}
       <div
         className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-200 pointer-events-none ${
@@ -297,8 +322,11 @@ export default function App() {
         </div>
       </div>
 
-      {/* Main Header */}
-      <Header
+      {/* 2. ESTRUCTURA DE NAVEGACIÓN Y LAYOUT:
+          - Desktop (md:flex): Barra lateral izquierda permanente
+          - Mobile (md:hidden): Cabecera superior y barra horizontal inferior
+      */}
+      <Sidebar
         currentTab={currentTab}
         onTabChange={(tab) => {
           if (tab !== 'database') setDbQuery('');
@@ -313,8 +341,15 @@ export default function App() {
         onLogout={handleLogout}
       />
 
+      <MobileHeader
+        onOpenNewReport={handleOpenNewReport}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+        onLogout={handleLogout}
+      />
+
       {/* Main View Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-24">
+      <main className="flex-1 min-w-0 max-w-7xl mx-auto w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6 pb-24 md:pb-8">
         {currentTab === 'reportes' && (
           <ReportsView
             reportes={db.reportes}
@@ -322,17 +357,18 @@ export default function App() {
             onGoToMovement={handleGoToMovement}
             onResolveSingle={(id) => handleOpenResolve([id])}
             onOpenNewReport={handleOpenNewReport}
+            onOpenImportCsv={() => setIsImportCsvOpen(true)}
+            onExportCsv={handleExportReportsCsv}
           />
         )}
 
-        {currentTab === 'resolver' && (
-          <ResolveView
+        {currentTab === 'gestion' && (
+          <GestionView
             reportes={db.reportes}
             movimientos={db.movimientos}
             onOpenResolve={handleOpenResolve}
             onGoToReport={handleGoToReport}
             onRequestDeleteMovement={(m) => setMovementToDelete(m)}
-            onOpenImportCsv={() => setIsImportCsvOpen(true)}
           />
         )}
 
@@ -353,6 +389,16 @@ export default function App() {
           />
         )}
       </main>
+
+      <MobileBottomNav
+        currentTab={currentTab}
+        onTabChange={(tab) => {
+          if (tab !== 'database') setDbQuery('');
+          setCurrentTab(tab);
+        }}
+        pendingCount={pendingCount}
+        totalReportsCount={db.reportes.length}
+      />
 
       {/* Modals */}
       <NewReportModal
@@ -381,13 +427,12 @@ export default function App() {
         onConfirmDelete={handleDeleteMovement}
       />
 
-      <ImportMovementsModal
+      <ImportReportsModal
         isOpen={isImportCsvOpen}
         onClose={() => setIsImportCsvOpen(false)}
-        nextMovementNumber={db.nm}
+        nextReportNumber={db.np}
         currentUser={currentUser || 'Franco'}
-        allReports={db.reportes}
-        onConfirmImport={handleConfirmImportMovements}
+        onConfirmImport={handleConfirmImportReports}
       />
     </div>
   );
