@@ -10,6 +10,7 @@ import { NewReportModal } from './components/NewReportModal';
 import { ResolveModal } from './components/ResolveModal';
 import { DeleteMovementModal } from './components/DeleteMovementModal';
 import { ImportReportsModal } from './components/ImportReportsModal';
+import { GitHubPagesModal } from './components/GitHubPagesModal';
 import { LoginGate } from './components/LoginGate';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
   const [resolveIds, setResolveIds] = useState<string[]>([]);
   const [movementToDelete, setMovementToDelete] = useState<StockMovement | null>(null);
   const [isImportCsvOpen, setIsImportCsvOpen] = useState(false);
+  const [isGitHubPagesModalOpen, setIsGitHubPagesModalOpen] = useState(false);
 
   // Database view deep-link state
   const [dbQuery, setDbQuery] = useState('');
@@ -339,6 +341,7 @@ export default function App() {
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         currentUser={currentUser}
         onLogout={handleLogout}
+        onOpenGitHubPagesModal={() => setIsGitHubPagesModalOpen(true)}
       />
 
       <MobileHeader
@@ -384,6 +387,7 @@ export default function App() {
             onClearAll={handleClearAll}
             onImportDatabase={handleImportDatabase}
             onOpenImportCsv={() => setIsImportCsvOpen(true)}
+            onOpenGitHubPagesModal={() => setIsGitHubPagesModalOpen(true)}
             initialQuery={dbQuery}
             initialSubTab={dbSubTab}
           />
@@ -432,7 +436,17 @@ export default function App() {
         onClose={() => setIsImportCsvOpen(false)}
         nextReportNumber={db.np}
         currentUser={currentUser || 'Franco'}
+        reporterNames={reporterNames}
         onConfirmImport={handleConfirmImportReports}
+      />
+
+      <GitHubPagesModal
+        isOpen={isGitHubPagesModalOpen}
+        onClose={() => setIsGitHubPagesModalOpen(false)}
+        db={db}
+        onImportDatabase={handleImportDatabase}
+        onExportCsv={handleExportReportsCsv}
+        onResetExample={handleResetExample}
       />
     </div>
   );

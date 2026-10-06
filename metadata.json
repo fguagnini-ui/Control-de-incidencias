@@ -1,6 +1,8 @@
 {
-  "name": "Tickets de Stock",
+  "name": "Remix Tickets de Stock",
   "description": "Sistema de gestión de reportes de stock, ingresos, productos encontrados y movimientos de inventario.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

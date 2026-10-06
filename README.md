@@ -1,20 +1,60 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Tickets de Stock - Mecano Tools
 
-# Run and deploy your AI Studio app
+Sistema web para la gestión de reportes de stock, control de ingresos, productos encontrados y movimientos de inventario. Totalmente compatible con **GitHub Pages**.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/258599c2-5770-4af3-859a-ae8a93820e18
+## 🚀 Despliegue en GitHub Pages
 
-## Run Locally
+Este proyecto ya está 100% configurado para funcionar en **GitHub Pages** sin configuraciones complejas:
 
-**Prerequisites:**  Node.js
+### Método 1: GitHub Actions (Automático - Recomendado)
+1. Sube este repositorio a GitHub (rama `main` o `master`).
+2. En tu repositorio en GitHub, ve a **Settings** > **Pages** (en el menú lateral izquierdo).
+3. En la sección **Build and deployment** > **Source**, selecciona:
+   👉 **GitHub Actions**
+4. Cada vez que hagas un `git push`, el archivo `.github/workflows/deploy.yml` compilará y publicará la aplicación automáticamente en tu URL de GitHub Pages (`https://<tu-usuario>.github.io/<tu-repo>/`).
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Método 2: Despliegue Manual con el comando `npm run deploy`
+Si prefieres compilar y publicar desde tu terminal:
+```bash
+# 1. Instalar dependencias si aún no lo hiciste
+npm install
+
+# 2. Desplegar directamente a la rama gh-pages
+npm run deploy
+```
+Luego en **Settings** > **Pages** de GitHub, selecciona la rama `gh-pages` como origen.
+
+---
+
+## 💻 Desarrollo Local
+
+Para correr el proyecto en tu computadora:
+
+```bash
+# Instalar paquetes
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+```
+
+El servidor iniciará en `http://localhost:3000`.
+
+---
+
+## 🔐 Credenciales de Acceso
+- **Usuario:** `Franco`
+- **Contraseña:** `Mecano1234`
+
+---
+
+## 💾 Persistencia de Datos y Respaldos
+
+- Al estar alojado como sitio estático en GitHub Pages, los datos se guardan de forma instantánea y persistente en el navegador (`localStorage`).
+- **Copia de seguridad:** Puedes descargar en cualquier momento un archivo `database.json` con todos los reportes y movimientos desde la pestaña **Base de Datos** > **Descargar JSON**.
+- **Restaurar / Migrar:** Puedes subir un archivo `database.json` en cualquier computadora para sincronizar los datos.
+- **Actualizar stock base del repositorio:** Si descargas el `database.json` y reemplazas el archivo en `src/data/database.json`, al subir los cambios a GitHub la nueva versión incluirá ese inventario por defecto.

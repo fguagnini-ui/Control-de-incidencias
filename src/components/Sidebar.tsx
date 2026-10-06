@@ -9,7 +9,8 @@ import {
   Sun,
   Moon,
   LogOut,
-  User
+  User,
+  Github
 } from 'lucide-react';
 import { ReportType } from '../types/stock';
 
@@ -23,6 +24,7 @@ interface SidebarProps {
   onToggleDarkMode: () => void;
   currentUser?: string;
   onLogout?: () => void;
+  onOpenGitHubPagesModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -34,7 +36,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDarkMode,
   onToggleDarkMode,
   currentUser,
-  onLogout
+  onLogout,
+  onOpenGitHubPagesModal
 }) => {
   return (
     <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 p-4 lg:p-5 select-none z-30">
@@ -148,6 +151,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>Base de datos</span>
             </div>
           </button>
+
+          {/* GitHub Pages & Sincronización */}
+          {onOpenGitHubPagesModal && (
+            <button
+              type="button"
+              onClick={onOpenGitHubPagesModal}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-900 dark:hover:text-white transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <Github className="w-4 h-4 text-neutral-800 dark:text-neutral-200" />
+                <span>GitHub Pages</span>
+              </div>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-bold">
+                Deploy
+              </span>
+            </button>
+          )}
         </nav>
       </div>
 

@@ -13,7 +13,8 @@ import {
   ArrowDownToLine,
   SearchCheck,
   FileCode2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Github
 } from 'lucide-react';
 import { StockReport, StockMovement, ReportStatus, ReportType, StockDatabase } from '../types/stock';
 import { fmtDate, downloadDatabaseJSON, parseDatabaseJSON } from '../utils/storage';
@@ -30,6 +31,7 @@ interface DatabaseViewProps {
   onClearAll: () => void;
   onImportDatabase?: (newDb: StockDatabase) => void;
   onOpenImportCsv?: () => void;
+  onOpenGitHubPagesModal?: () => void;
   initialQuery?: string;
   initialSubTab?: 'reportes' | 'movimientos';
 }
@@ -63,6 +65,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   onClearAll,
   onImportDatabase,
   onOpenImportCsv,
+  onOpenGitHubPagesModal,
   initialQuery = '',
   initialSubTab
 }) => {
@@ -323,6 +326,19 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            {/* GitHub Pages & Sync Guide */}
+            {onOpenGitHubPagesModal && (
+              <button
+                type="button"
+                onClick={onOpenGitHubPagesModal}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 dark:border-neutral-600 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 text-xs font-bold transition-all cursor-pointer shadow-xs"
+                title="Abrir guía de GitHub Pages y herramientas de sincronización"
+              >
+                <Github className="w-3.5 h-3.5" />
+                <span>GitHub Pages</span>
+              </button>
+            )}
+
             {/* Download JSON Backup */}
             <button
               type="button"
